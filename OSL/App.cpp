@@ -5,6 +5,7 @@
 #include <cassert>
 #include <set>
 #include <glm/gtc/matrix_transform.hpp>
+#include <fstream>
 
 #define BUFFER_OFFSET(i) ((char *)nullptr + (i))
 
@@ -86,6 +87,8 @@ App::App() {
 	forwardProgram.cubes = cubeMatrices;
 	
 	forwardProgram.init();
+	lights.init(forwardProgram.programID, 2);
+	createFrameBuffer();
 }
 App::~App(){
 
@@ -97,7 +100,6 @@ GLuint App::createSphereVBO(int resolution)
 	float increment = (3.1415 * 2)/resolution;
 	std::vector<vtxData> data;
 	data.resize(resolution*(resolution/2+1));
-	//vtxData* data = new vtxData[];
 	float x, y, z;
 	for (int i = 0; i < resolution/2+1; i++)
 	{
@@ -120,7 +122,6 @@ GLuint App::createSphereVBO(int resolution)
 	std::vector<face> faceData;
 	vtxData t = { 1,1,1,1,1,1,1,1 };
 	faceData.resize(2 * newRes*(newRes / 2 + 1) + 10, {t,t,t});
-	//face* faceData = new face[2*newRes*(newRes/2+1)];
 	for (int i = 0; i < newRes/2; i++) {
 		for (int j = 0; j < newRes; j++) {
 			int a = i*newRes + j;
@@ -128,7 +129,7 @@ GLuint App::createSphereVBO(int resolution)
 			int c = (i + 1)*newRes + j;
 			int d = (i + 1)*newRes + (j + 1) % newRes;
 			int index = 2 * (i*newRes + j);
-			faceData[index] = { data[a],data[b],data[c] }; //winding order(?)
+			faceData[index] = { data[a],data[c],data[b] }; //winding order(?)
 			faceData[index + 1] = { data[b],data[c],data[d] }; //winding order(???)
 			sphereSize += 6;
 		}
@@ -197,24 +198,23 @@ GLuint App::createCubeVBO()
 						{ 1, 1 }	   //11
 	};
 	//Faces
-	betterFace faces[12] = {{ { pos[0], norm[4], UVs[10] }, { pos[1], norm[4], UVs[11] }, { pos[2], norm[4], UVs[7] } }, 
-							{ { pos[1], norm[4], UVs[11] }, { pos[3], norm[4], UVs[8] }, { pos[2], norm[4], UVs[7] } },
+	betterFace faces[12] = {{ { pos[0], norm[4], UVs[10] }, { pos[2], norm[4], UVs[7] }, { pos[1], norm[4], UVs[11] } }, 
+							{ { pos[1], norm[4], UVs[11] }, { pos[2], norm[4], UVs[7] }, { pos[3], norm[4], UVs[8] } },
 											  																   
-							{ { pos[1], norm[1], UVs[5] }, { pos[0], norm[1], UVs[2] }, { pos[4], norm[1], UVs[1] } } , 
-							{ { pos[1], norm[1], UVs[5] }, { pos[4], norm[1], UVs[1] }, { pos[5], norm[1], UVs[4] } } ,
+							{ { pos[1], norm[1], UVs[5] }, { pos[4], norm[1], UVs[1] }, { pos[0], norm[1], UVs[2] } } , 
+							{ { pos[1], norm[1], UVs[5] }, { pos[5], norm[1], UVs[4] }, { pos[4], norm[1], UVs[1] } } ,
 							 								 				 			 					   
-							{ { pos[4], norm[5], UVs[8] }, { pos[7], norm[5], UVs[4] }, { pos[5], norm[5], UVs[7] } } , 
-							{ { pos[4], norm[5], UVs[8] }, { pos[6], norm[5], UVs[5] }, { pos[7], norm[5], UVs[4] } } ,
+							{ { pos[4], norm[5], UVs[8] }, { pos[5], norm[5], UVs[7] }, { pos[7], norm[5], UVs[4] } } , 
+							{ { pos[4], norm[5], UVs[8] }, { pos[7], norm[5], UVs[4] }, { pos[6], norm[5], UVs[5] } } ,
 							 								 				 			 					   
-							{ { pos[2], norm[3], UVs[7] }, { pos[3], norm[3], UVs[4] }, { pos[6], norm[3], UVs[6] } } , 
-							{ { pos[3], norm[3], UVs[4] }, { pos[7], norm[3], UVs[3] }, { pos[6], norm[3], UVs[6] } } ,
+							{ { pos[2], norm[3], UVs[7] }, { pos[6], norm[3], UVs[6] }, { pos[3], norm[3], UVs[4] } } , 
+							{ { pos[3], norm[3], UVs[4] }, { pos[6], norm[3], UVs[6] }, { pos[7], norm[3], UVs[3] } } ,
 							 								 				 			 					   
 							{ { pos[0], norm[2], UVs[10] }, { pos[6], norm[2], UVs[6] }, { pos[2], norm[2], UVs[7] } } , 
 							{ { pos[0], norm[2], UVs[10] }, { pos[4], norm[2], UVs[9] }, { pos[6], norm[2], UVs[6] } } ,
 														 			 				 						   
-							{ { pos[1], norm[0], UVs[1] }, { pos[5], norm[0], UVs[0] }, { pos[7], norm[0], UVs[3] } } , 
-							{ { pos[1], norm[0], UVs[1] }, { pos[7], norm[0], UVs[3] }, { pos[3], norm[0], UVs[4] } }
-	
+							{ { pos[1], norm[0], UVs[1] }, { pos[7], norm[0], UVs[3] }, { pos[5], norm[0], UVs[0] } } , 
+							{ { pos[1], norm[0], UVs[1] }, { pos[3], norm[0], UVs[4] }, { pos[7], norm[0], UVs[3] } }
 	};			
 
 	glGenBuffers(1, &vbo);
@@ -235,9 +235,9 @@ GLuint App::createCubeVBO()
 void App::createCubes()
 {
 	int index = 0;
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < 12; i++)
 	{
-		for (int j = 0; j < 13; j++) {
+		for (int j = 0; j < 12; j++) {
 			cubeMatrices[index++] = glm::translate(glm::mat4(1), glm::vec3(i *2* 2, -2, j*2*2));
 		}
 	}
@@ -253,9 +253,9 @@ void App::createCubes()
 void App::createSpheres()
 {
 	int index = 0;
-	for (int i = 0; i < 13; i++)
+	for (int i = 0; i < 12; i++)
 	{
-		for (int j = 0; j < 13; j ++) {
+		for (int j = 0; j < 12; j ++) {
 			sphereMatrices[index++] = glm::translate(glm::mat4(1), glm::vec3(i*2*2, -2, (j*2+1)*2));
 		}
 	}
@@ -287,6 +287,54 @@ GLuint App::loadTexture(std::string path)
 	return tex;
 }
 
+void App::createFrameBuffer()
+{
+	glGenFramebuffers(1, &fbo);
+	glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	glGenTextures(1, &screenSaveTex);
+	
+	glBindTexture(GL_TEXTURE_2D, screenSaveTex);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, Camera::SCREEN_WIDTH * 2, Camera::SCREEN_HEIGHT * 2, 0, GL_RGBA, GL_FLOAT, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, screenSaveTex, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void App::saveFrameToFile()
+{
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+	glBlitFramebuffer(0, 0, Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, 0, 0, Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+	
+	std::vector<unsigned char> imgData(Camera::SCREEN_WIDTH * Camera::SCREEN_HEIGHT  * 3);
+
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0, 0, Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, &imgData[0]);
+
+	int err = SOIL_save_image
+	(
+		"img.bmp",
+		SOIL_SAVE_TYPE_BMP,
+		Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, 3,
+		&imgData[0]
+	);
+}
+
+double xpos, ypos, lastx, lasty;
+void App::controls(float dt)
+{
+	glfwGetCursorPos(w, &xpos, &ypos);
+	camera.update(lastx - xpos, lasty - ypos, dt);
+	lastx = xpos;
+	lasty = ypos;
+	updateInputs();
+	camera.move(movement, dt);
+}
+
 void App::run() {
 	glClearColor(1.0, 0.0, 1.0, 1.0);
 	double xpos, ypos, lastx, lasty;
@@ -294,25 +342,38 @@ void App::run() {
 	double time, dt;
 	time = 0.0;
 	glfwSetTime(time);
-	glFinish();
+
+	double runTime = 5;
+	double screenShotTimer = 2;
+	int totalFrames = 0;
+	glfwSwapInterval(0);
 	while(!glfwWindowShouldClose(w) && running){
 		dt = glfwGetTime() - time;
 		time = glfwGetTime();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();	
-		glfwGetCursorPos(w, &xpos, &ypos);
-		camera.update(lastx - xpos, lasty - ypos, dt);
-		lastx = xpos;
-		lasty = ypos;
-		updateInputs();
-		camera.move(movement, dt);
+		lights.update(forwardProgram.programID, dt);
+		controls(dt);
 		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos);
 		glfwSwapBuffers(w);
 		int a = glGetError();
 		if (a) {
 			std::cout << glewGetErrorString(a) << std::endl;
 		}
+		totalFrames++;
+		runTime -= dt;
+		if (runTime <= 0.0)
+			running = false;
+		screenShotTimer -= dt;
+		if (screenShotTimer < 0)
+		{
+			saveFrameToFile();
+			screenShotTimer = 500;
+		}
 	}
+	std::ofstream logFile("log.txt");
+	logFile << totalFrames << "\n";
+	logFile.close();
 }
 
 void GLAPIENTRY gl_callback(GLenum source, GLenum type, GLuint id,

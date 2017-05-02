@@ -5,6 +5,7 @@
 #include "GLFW\glfw3.h"
 #include "src\SOIL.h"
 #include <string>
+#include "Lights.h"
 
 class App {
 struct vtxData{
@@ -28,11 +29,12 @@ private:
 	Forward forwardProgram;
 	GLFWwindow* w;
 	Camera camera;
-	glm::mat4 cubeMatrices[25*25];
-	glm::mat4 sphereMatrices[25*25];
-
-
+	glm::mat4 cubeMatrices[12*12*2];
+	glm::mat4 sphereMatrices[12*12*2];
 	glm::vec3 movement = { 0,0,0 };
+	Lights lights;
+
+	void controls(float dt);
 public:
 	App();
 	~App();
@@ -43,4 +45,9 @@ public:
 	void createSpheres();
 	void updateInputs();
 	GLuint loadTexture(std::string path);
+
+	GLuint fbo;
+	GLuint screenSaveTex;
+	void createFrameBuffer();
+	void saveFrameToFile();
 };

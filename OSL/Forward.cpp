@@ -86,8 +86,6 @@ void Forward::init()
 	int x = glGetError();
 	if (x != 0)
 		cout << "Error in forward program constructor, nr: " << x << endl;
-
-	lights.init(this->programID, 2);
 }
 
 void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position)
@@ -102,11 +100,10 @@ void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position)
 	
 	GLint locWorld = glGetUniformLocation(this->programID, "world");
 
-	lights.update(this->programID, 0.01f);
 
 	glBindVertexArray(cubeVao);
 	glBindTexture(GL_TEXTURE_2D, cubeTex);
-	for (int i = 0; i < 25*25; i++)
+	for (int i = 0; i < 24*12; i++)
 	{
 		glUniformMatrix4fv(locWorld, 1, GL_FALSE, &cubes[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -114,7 +111,7 @@ void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position)
 	
 	glBindVertexArray(sphereVao);
 	glBindTexture(GL_TEXTURE_2D, sphereTex);
-	for (int i = 0; i < 25*25; i++)
+	for (int i = 0; i < 24*12; i++)
 	{
 		glUniformMatrix4fv(locWorld, 1, GL_FALSE, &spheres[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, 4800);

@@ -33,7 +33,7 @@ void main(){
     float specular = pow(max(dot(eyeDir, vHalfVector),0.0), 20);
 */
 	vec4 color = texture(someTex, UVout);
-	fragment_color = vec4(0);
+	fragment_color = color;
 	vec3 diffuseVec;
 	float diffuse;
 	vec3 eyeDir;

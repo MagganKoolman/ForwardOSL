@@ -16,7 +16,5 @@ public:
 	GLuint sphereVao;
 	GLuint cubeTex;
 	GLuint sphereTex;
-private:
 	GLuint programID;
-	Lights lights;
 };

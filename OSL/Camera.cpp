@@ -3,8 +3,8 @@
 
 Camera::Camera()
 {
-	this->cameraPos = { 0.0, 0.0, 10.0 };
-	this->cameraDir = { 0.0, 0.0, -1.0 };
+	this->cameraPos = { 24.0, 52.0, 30.0 };
+	this->cameraDir = { 0.0, -0.9, -0.07 };
 	this->cameraRight = cross(vec3(0.0, 1.0, 0.0), this->cameraDir);
 
 	this->view = glm::lookAt(this->cameraPos,
@@ -26,7 +26,7 @@ void Camera::update(double xpos, double ypos, float dt)
 	this->cameraRight = cross(vec3(0.0, 1.0, 0.0), this->cameraDir);
 	this->view = glm::lookAt(this->cameraPos,
 		this->cameraPos + this->cameraDir,
-		glm::vec3(0.0, 1.0, 0.0));	
+		glm::vec3(0.0, 1.0, 0.0));
 }
 
 glm::mat4 Camera::getViewProjection()
@@ -39,14 +39,4 @@ void Camera::move(glm::vec3 direction, float dt)
 	this->cameraPos += this->cameraDir * direction.z * 10.f * dt;
 	this->cameraPos += this->cameraRight * direction.x * 10.f * dt;
 	this->cameraPos += glm::vec3(0, 1, 0)*direction.y * 10.f*dt;
-	/*
-	this->cameraPos += this->cameraDir * 10.f* dt;
-
-	this->cameraPos -= this->cameraDir *10.f* dt;
-
-	this->cameraPos += this->cameraRight *10.f* dt;
-
-	this->cameraPos -= this->cameraRight *10.f* dt;
-	*/
-
 }
