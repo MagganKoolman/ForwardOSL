@@ -78,7 +78,7 @@ App::App() {
 	glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	sphereSize = 0;
-	forwardProgram.sphereVao = createSphereVBO(40);
+	forwardProgram.sphereVao = createSphereVBO(20);
 	createSpheres();
 	forwardProgram.spheres = sphereMatrices;
 
@@ -87,50 +87,129 @@ App::App() {
 	forwardProgram.cubes = cubeMatrices;
 	
 	forwardProgram.init();
-	lights.init(forwardProgram.programID, 2);
+	forwardProgram.sphereSize = sphereSize;
 	createFrameBuffer();
 }
 App::~App(){
 
 }
 
+GLuint App::createSphereVBO(int xRes, int yRes) {
+	float pi = glm::pi<float>();
+	float xIncrement = (3.1415 * 2) / xRes;
+	float yIncrement = (3.1415) / (yRes - 1);
+
+	std::vector<vtxData> data;
+	data.resize(xRes * (yRes + 1));
+	float x, y, z;
+	for (int i = 0; i < yRes + 1; i++)
+	{
+		for (int j = 0; j < xRes; j++) {
+			x = sinf(j*xIncrement)*sinf(i*yIncrement);
+			y = cosf(i*yIncrement);
+			z = cosf(j*xIncrement)*sinf(i*yIncrement);
+			data[i*xRes + j] = { x / 2, //positions
+				y / 2,
+				z / 2,
+				x,	//normals
+				y,
+				z,
+				(float)j / (xRes), //uvs
+				(float)i / (yRes)
+			};
+		}
+	}
+
+	std::vector<face> faceData;
+	vtxData t = { 1,1,1,1,1,1,1,1 };
+	faceData.resize(2 * xRes*yRes, { t,t,t });
+	for (int i = 0; i < yRes - 1; i++) {
+		for (int j = 0; j < xRes; j++) {
+			int a = i*xRes + j;
+			int b = i*xRes + (j + 1) % xRes;
+			int c = (i + 1)*xRes + j;
+			int d = (i + 1)*xRes + (j + 1) % xRes;
+			int index = 2 * (i*(xRes)+j);
+			vtxData va = data[a];
+			vtxData vb = data[b];
+			vtxData vc = data[c];
+			vtxData vd = data[d];
+			if (j == xRes - 1) {
+				vb.u = 1.0f;
+				vd.u = 1.0f;
+			}
+			faceData[index] = { va, vc, vb }; //winding order(?)
+			faceData[index + 1] = { vb, vc, vd }; //winding order(???)
+			sphereSize += 6;
+		}
+	}
+	GLuint vbo;
+	glGenVertexArrays(1, &sphereVa);
+	glBindVertexArray(sphereVa);
+
+	glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(face)* faceData.size(), faceData.data(), GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(1);
+	glEnableVertexAttribArray(2);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vtxData), 0);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_TRUE, sizeof(vtxData), (void*)offsetof(vtxData, x));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vtxData), (void*)offsetof(vtxData, u));
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	forwardProgram.sphereTex = loadTexture("textures/daSphere.png");
+	return sphereVa;
+}
 
 GLuint App::createSphereVBO(int resolution)
 {
-	float increment = (3.1415 * 2)/resolution;
+	float increment = (3.1415 * 2) / resolution;
 	std::vector<vtxData> data;
-	data.resize(resolution*(resolution/2+1));
+	data.resize(resolution*(resolution / 2 + 1));
 	float x, y, z;
-	for (int i = 0; i < resolution/2+1; i++)
+	for (int i = 0; i < resolution / 2 + 1; i++)
 	{
 		for (int j = 0; j < resolution; j++) {
 			x = sinf(j*increment)*sinf(i*increment);
 			y = cosf(i*increment);
 			z = cosf(j*increment)*sinf(i*increment);
-			data[i*resolution + j] = {	x/2, //positions
-										y/2,
-										z/2,
-										x,	//normals
-										y,
-										z,
-										(float)j/(resolution-1), //uvs
-										1-(float)i/(resolution/2)
+			data[i*resolution + j] = { x / 2, //positions
+				y / 2,
+				z / 2,
+				x,	//normals
+				y,
+				z,
+				(float)j / (resolution), //uvs
+				1 - (float)i / (resolution / 2)
 			};
 		}
 	}
 	int newRes = resolution;
 	std::vector<face> faceData;
 	vtxData t = { 1,1,1,1,1,1,1,1 };
-	faceData.resize(2 * newRes*(newRes / 2 + 1) + 10, {t,t,t});
-	for (int i = 0; i < newRes/2; i++) {
+	faceData.resize(2 * newRes*(newRes / 2 + 1) + 10, { t,t,t });
+	for (int i = 0; i < newRes / 2; i++) {
 		for (int j = 0; j < newRes; j++) {
 			int a = i*newRes + j;
 			int b = i*newRes + (j + 1) % newRes;
 			int c = (i + 1)*newRes + j;
 			int d = (i + 1)*newRes + (j + 1) % newRes;
-			int index = 2 * (i*newRes + j);
-			faceData[index] = { data[a],data[c],data[b] }; //winding order(?)
-			faceData[index + 1] = { data[b],data[c],data[d] }; //winding order(???)
+			int index = 2 * (i*(newRes)+j);
+			vtxData va = data[a];
+			vtxData vb = data[b];
+			vtxData vc = data[c];
+			vtxData vd = data[d];
+			if (j == newRes - 1) {
+				vb.u = 1.0f;
+				vd.u = 1.0f;
+			}
+			faceData[index] = { va, vc, vb }; //winding order(?)
+			faceData[index + 1] = { vb, vc, vd }; //winding order(???)
 			sphereSize += 6;
 		}
 	}
@@ -302,7 +381,7 @@ void App::createFrameBuffer()
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void App::saveFrameToFile()
+void App::saveFrameToFile(int nr)
 {
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
@@ -314,7 +393,7 @@ void App::saveFrameToFile()
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, &imgData[0]);
-
+	
 	int err = SOIL_save_image
 	(
 		"img.bmp",
@@ -337,14 +416,13 @@ void App::controls(float dt)
 
 void App::run() {
 	glClearColor(1.0, 0.0, 1.0, 1.0);
-	double xpos, ypos, lastx, lasty;
 	glfwGetCursorPos(w, &lastx, &lasty);
 	double time, dt;
 	time = 0.0;
 	glfwSetTime(time);
-
 	double runTime = 5;
 	double screenShotTimer = 2;
+	int nrOfScreenShots = 0;
 	int totalFrames = 0;
 	glfwSwapInterval(0);
 	while(!glfwWindowShouldClose(w) && running){
@@ -352,9 +430,8 @@ void App::run() {
 		time = glfwGetTime();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();	
-		lights.update(forwardProgram.programID, dt);
-		controls(dt);
-		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos);
+		//controls(dt);
+		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos, dt);
 		glfwSwapBuffers(w);
 		int a = glGetError();
 		if (a) {
@@ -367,8 +444,8 @@ void App::run() {
 		screenShotTimer -= dt;
 		if (screenShotTimer < 0)
 		{
-			saveFrameToFile();
-			screenShotTimer = 500;
+			saveFrameToFile(nrOfScreenShots++);
+			screenShotTimer = 5;
 		}
 	}
 	std::ofstream logFile("log.txt");

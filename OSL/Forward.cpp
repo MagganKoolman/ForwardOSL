@@ -86,12 +86,13 @@ void Forward::init()
 	int x = glGetError();
 	if (x != 0)
 		cout << "Error in forward program constructor, nr: " << x << endl;
+	lights.init(programID, nrOfLights);
 }
 
-void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position)
+void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, float dt)
 {
 	glUseProgram(this->programID);
-
+	lights.update(programID, dt);
 	GLint loc = glGetUniformLocation(this->programID, "viewProjection");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &viewProj[0][0]);
 	
@@ -114,6 +115,6 @@ void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position)
 	for (int i = 0; i < 24*12; i++)
 	{
 		glUniformMatrix4fv(locWorld, 1, GL_FALSE, &spheres[i][0][0]);
-		glDrawArrays(GL_TRIANGLES, 0, 4800);
+		glDrawArrays(GL_TRIANGLES, 0, sphereSize);
 	}
 }

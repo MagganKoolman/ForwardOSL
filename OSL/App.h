@@ -32,7 +32,6 @@ private:
 	glm::mat4 cubeMatrices[12*12*2];
 	glm::mat4 sphereMatrices[12*12*2];
 	glm::vec3 movement = { 0,0,0 };
-	Lights lights;
 
 	void controls(float dt);
 public:
@@ -40,6 +39,7 @@ public:
 	~App();
 	void run();
 	GLuint createSphereVBO(int resolution);
+	GLuint createSphereVBO(int xRes, int yRes);
 	GLuint createCubeVBO();
 	void createCubes();
 	void createSpheres();
@@ -49,5 +49,5 @@ public:
 	GLuint fbo;
 	GLuint screenSaveTex;
 	void createFrameBuffer();
-	void saveFrameToFile();
+	void saveFrameToFile(int nr);
 };
