@@ -77,6 +77,8 @@ App::App() {
 	glfwSetKeyCallback(w, key_callback);
 	glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+	forwardProgram.init();
+
 	sphereSize = 0;
 	forwardProgram.sphereVao = createSphereVBO(20, 20);
 	createSpheres();
@@ -86,7 +88,6 @@ App::App() {
 	createCubes();
 	forwardProgram.cubes = cubeMatrices;
 	
-	forwardProgram.init();
 	forwardProgram.sphereSize = sphereSize;
 	createFrameBuffer();
 }
@@ -164,7 +165,7 @@ GLuint App::createSphereVBO(int xRes, int yRes) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	forwardProgram.sphereTex = loadTexture("textures/daSphere128.png");
+	forwardProgram.sphereTex = loadTexture("textures/daSphere256.png");
 	return sphereVa;
 }
 
@@ -234,7 +235,7 @@ GLuint App::createSphereVBO(int resolution)
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	forwardProgram.sphereTex = loadTexture("textures/daSphere.png");
+	forwardProgram.sphereTex = loadTexture("textures/daSphere256.png");
 	return sphereVa;
 }
 
@@ -310,24 +311,32 @@ GLuint App::createCubeVBO()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(betterData), (void*)offsetof(betterData, normals));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(betterData), (void*)offsetof(betterData, UV));
 
-	forwardProgram.cubeTex = loadTexture("textures/rubik128.png");
+	forwardProgram.cubeTex = loadTexture("textures/rubik256.png");
 	return cubeVa;
 }
 
 void App::createCubes()
 {
 	int index = 0;
-	for (int i = 0; i < 12; i++)
+	glm::vec3 pos;
+	float radius = sqrtf(3) / 2;
+	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 12; j++) {
-			cubeMatrices[index++] = glm::translate(glm::mat4(1), glm::vec3(i *2* 2, -2, j*2*2));
+		for (int j = 0; j < 16; j++) {
+			pos = glm::vec3(i * 2 * 2, -2, j * 2 * 2);
+			forwardProgram.cubeObjs[index].hb.init(pos, radius);
+			forwardProgram.cubeObjs[index].fixed = false;
+			cubeMatrices[index++] = glm::translate(glm::mat4(1), pos);
 		}
 	}
 
-	for (int i = 0; i < 12; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 12; j++) {
-			cubeMatrices[index++] = glm::translate(glm::mat4(1), glm::vec3(i *2* 2, 2, (j*2+1) * 2));
+		for (int j = 0; j < 16; j++) {
+			pos = glm::vec3(i * 2 * 2, 2, (j * 2 + 1) * 2);
+			forwardProgram.cubeObjs[index].hb.init(pos, radius);
+			forwardProgram.cubeObjs[index].fixed = false;
+			cubeMatrices[index++] = glm::translate(glm::mat4(1), pos);
 		}
 	}
 }
@@ -335,17 +344,24 @@ void App::createCubes()
 void App::createSpheres()
 {
 	int index = 0;
-	for (int i = 0; i < 12; i++)
+	glm::vec3 pos;
+	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 12; j ++) {
-			sphereMatrices[index++] = glm::translate(glm::mat4(1), glm::vec3(i*2*2, -2, (j*2+1)*2));
+		for (int j = 0; j < 16; j++) {
+			pos = glm::vec3(i * 2 * 2, -2, (j * 2 + 1) * 2);
+			forwardProgram.sphereObjs[index].hb.init(pos, 0.5f);
+			forwardProgram.sphereObjs[index].fixed = false;
+			sphereMatrices[index++] = glm::translate(glm::mat4(1), pos);
 		}
 	}
 
-	for (int i = 0; i < 12; i++)
+	for (int i = 0; i < 8; i++)
 	{
-		for (int j = 0; j < 12; j ++) {
-			sphereMatrices[index++] = glm::translate(glm::mat4(1), glm::vec3(i * 2*2, 2, j *2* 2));
+		for (int j = 0; j < 16; j++) {
+			pos = glm::vec3(i * 2 * 2, 2, j * 2 * 2);
+			forwardProgram.sphereObjs[index].hb.init(pos, 0.5f);
+			forwardProgram.sphereObjs[index].fixed = false;
+			sphereMatrices[index++] = glm::translate(glm::mat4(1), pos);
 		}
 	}
 }
@@ -361,10 +377,10 @@ GLuint App::loadTexture(std::string path)
 	glBindTexture(GL_TEXTURE_2D, tex);
 	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, width, height);// , 0, GL_RGBA, GL_FLOAT, nullptr);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return tex;
@@ -434,7 +450,7 @@ void App::run() {
 		time = glfwGetTime();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();	
-		//controls(dt);
+		controls(dt);
 		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos, 0.05f);
 		glfwSwapBuffers(w);
 		int a = glGetError();
@@ -442,7 +458,7 @@ void App::run() {
 			std::cout << glewGetErrorString(a) << std::endl;
 		}
 		totalFrames++;
-		runTime -= dt;
+		//runTime -= dt;
 		if (runTime <= 0.0)
 			running = false;
 		screenShotTimer -= 0.05f;

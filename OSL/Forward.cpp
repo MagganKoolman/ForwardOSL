@@ -87,34 +87,54 @@ void Forward::init()
 	if (x != 0)
 		cout << "Error in forward program constructor, nr: " << x << endl;
 	lights.init(programID, nrOfLights);
+
+	this->sphereObjs = new renderObject[256];
+	this->cubeObjs = new renderObject[256];
+}
+
+void Forward::updateLights(renderObject* instances, int number) {
+	for (int i = 0; i < number; i++) {
+		instances[i].lightsAffecting = 0;
+		for (int j = 0; j < nrOfLights; j++) {
+			if (instances[i].hb.intersect(&lights.lightboxes[j])) {
+				int index = instances[i].lightsAffecting++;
+				instances[i].lights[index] = j;
+			}
+		}
+	}
 }
 
 void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, float dt)
 {
 	glUseProgram(this->programID);
 	//lights.update(programID, dt);
-	GLint loc = glGetUniformLocation(this->programID, "viewProjection");
-	glUniformMatrix4fv(loc, 1, GL_FALSE, &viewProj[0][0]);
+	//GLint loc = glGetUniformLocation(this->programID, "viewProjection");
+	glUniformMatrix4fv(3, 1, GL_FALSE, &viewProj[0][0]);
 	
-	GLint loc2 = glGetUniformLocation(this->programID, "cameraPos");
-	glUniform3fv(loc2, 1, &position[0]);
+	//GLint loc2 = glGetUniformLocation(this->programID, "cameraPos");
+	glUniform3fv(2, 1, &position[0]);
 	
-	GLint locWorld = glGetUniformLocation(this->programID, "world");
-
+	//GLint locWorld = glGetUniformLocation(this->programID, "world");
+	updateLights(sphereObjs, 256); 
+	updateLights(cubeObjs, 256);
 
 	glBindVertexArray(cubeVao);
 	glBindTexture(GL_TEXTURE_2D, cubeTex);
-	for (int i = 0; i < 24*12; i++)
+	for (int i = 0; i < 256; i++)
 	{
-		glUniformMatrix4fv(locWorld, 1, GL_FALSE, &cubes[i][0][0]);
+		glUniform1i(4, cubeObjs[i].lightsAffecting);
+		glUniform1iv(5, 10, cubeObjs[i].lights);
+		glUniformMatrix4fv(1, 1, GL_FALSE, &cubes[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 	
 	glBindVertexArray(sphereVao);
 	glBindTexture(GL_TEXTURE_2D, sphereTex);
-	for (int i = 0; i < 24*12; i++)
+	for (int i = 0; i < 256; i++)
 	{
-		glUniformMatrix4fv(locWorld, 1, GL_FALSE, &spheres[i][0][0]);
+		glUniform1i(4, sphereObjs[i].lightsAffecting);
+		glUniform1iv(5, 10, sphereObjs[i].lights);
+		glUniformMatrix4fv(1, 1, GL_FALSE, &spheres[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, sphereSize);
 	}
 }

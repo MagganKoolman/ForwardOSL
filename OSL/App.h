@@ -29,8 +29,8 @@ private:
 	Forward forwardProgram;
 	GLFWwindow* w;
 	Camera camera;
-	glm::mat4 cubeMatrices[12*12*2];
-	glm::mat4 sphereMatrices[12*12*2];
+	glm::mat4 cubeMatrices[256];
+	glm::mat4 sphereMatrices[256];
 	glm::vec3 movement = { 0,0,0 };
 
 	void controls(float dt);

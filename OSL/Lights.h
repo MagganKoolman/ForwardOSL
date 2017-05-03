@@ -2,6 +2,7 @@
 #include "GL\glew.h"
 #include "glm\glm.hpp"
 #include "GLFW\glfw3.h"
+#include "Hitbox.h"
 
 using namespace glm;
 struct aLight {
@@ -16,6 +17,7 @@ public:
 	void init(GLuint programID, int nrOfLights);
 
 	aLight* allLights;
+	Hitbox* lightboxes;
 
 private:
 	GLuint lightBuffer;

@@ -6,9 +6,9 @@ in vec2 UVout;
 
 out vec4 fragment_color;
 
-layout (location = 8) uniform vec3 cameraPos;
+layout(location = 2) uniform vec3 cameraPos;
 
-uniform sampler2D someTex;
+layout(location = 0)uniform sampler2D someTex;
 
 struct Light{
 	vec4 position;
@@ -22,6 +22,9 @@ layout(std140) uniform Lights
   Light lights[nrOfLights];
 };
 
+layout(location = 5) uniform int indices[nrOfLights];
+layout(location = 4) uniform int activeLights;
+
 void main()
 {
 	vec4 color = texture(someTex, UVout);
@@ -31,18 +34,21 @@ void main()
 	vec3 eyeDir;
 	vec3 vHalfVector;
 	float specular = 0;
-	for (int i = 0; i < nrOfLights; i++)
+	int index = 0;
+	for (int i = 0; i < activeLights; i++)
 	{
-		if (length(lights[i].position.xyz - posOut) < lights[i].position.w)
+		index = indices[i];
+		if (length(lights[index].position.xyz - posOut) < lights[index].position.w)
 		{
-			diffuseVec = normalize(lights[i].position.xyz - posOut);
+			diffuseVec = normalize(lights[index].position.xyz - posOut);
 			diffuse += dot(diffuseVec, normalOut);
 
-			eyeDir = normalize(lights[i].position.xyz  - cameraPos);
+			eyeDir = normalize(lights[index].position.xyz  - cameraPos);
 			vHalfVector = reflect(diffuseVec, normalOut);
 			specular += pow(max(dot(eyeDir, vHalfVector),0.0), 20);
 		}
 	}
 	diffuse = max(diffuse, 0.0);
+	specular = max(specular, 0.0);
 	fragment_color = (0.2+diffuse+specular)*color;  
 }
