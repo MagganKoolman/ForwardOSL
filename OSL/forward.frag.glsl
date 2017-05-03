@@ -15,41 +15,34 @@ struct Light{
 	vec4 colora;
 };
 
-const int nrOfLights = 2;
+const int nrOfLights = 10;
 
 layout(std140) uniform Lights
 {
   Light lights[nrOfLights];
 };
 
-void main(){
-/*
-	vec3 aLight = {10, -0.5, 10};
-	vec3 diffuseVec = normalize(aLight - posOut);
-	float diffuse = dot(diffuseVec, normalOut);
-
-	vec3 eyeDir = normalize(posOut - cameraPos);
-	vec3 vHalfVector = reflect(diffuseVec, normalOut);
-    float specular = pow(max(dot(eyeDir, vHalfVector),0.0), 20);
-*/
+void main()
+{
 	vec4 color = texture(someTex, UVout);
 	fragment_color = color;
 	vec3 diffuseVec;
-	float diffuse;
+	float diffuse = 0;
 	vec3 eyeDir;
 	vec3 vHalfVector;
-	float specular;
+	float specular = 0;
 	for (int i = 0; i < nrOfLights; i++)
 	{
 		if (length(lights[i].position.xyz - posOut) < lights[i].position.w)
 		{
 			diffuseVec = normalize(lights[i].position.xyz - posOut);
-			diffuse = dot(diffuseVec, normalOut);
+			diffuse += dot(diffuseVec, normalOut);
 
 			eyeDir = normalize(lights[i].position.xyz  - cameraPos);
 			vHalfVector = reflect(diffuseVec, normalOut);
-			specular = pow(max(dot(eyeDir, vHalfVector),0.0), 20);
-			fragment_color += color * diffuse + color * specular + lights[i].colora;
+			specular += pow(max(dot(eyeDir, vHalfVector),0.0), 20);
 		}
 	}
+	diffuse = max(diffuse, 0.0);
+	fragment_color = (0.2+diffuse+specular)*color;  
 }

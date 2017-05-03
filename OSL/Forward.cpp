@@ -92,7 +92,7 @@ void Forward::init()
 void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, float dt)
 {
 	glUseProgram(this->programID);
-	lights.update(programID, dt);
+	//lights.update(programID, dt);
 	GLint loc = glGetUniformLocation(this->programID, "viewProjection");
 	glUniformMatrix4fv(loc, 1, GL_FALSE, &viewProj[0][0]);
 	

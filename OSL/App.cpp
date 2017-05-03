@@ -78,7 +78,7 @@ App::App() {
 	glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	sphereSize = 0;
-	forwardProgram.sphereVao = createSphereVBO(20);
+	forwardProgram.sphereVao = createSphereVBO(20, 20);
 	createSpheres();
 	forwardProgram.spheres = sphereMatrices;
 
@@ -101,6 +101,7 @@ GLuint App::createSphereVBO(int xRes, int yRes) {
 
 	std::vector<vtxData> data;
 	data.resize(xRes * (yRes + 1));
+	//vtxData* data = new vtxData[];
 	float x, y, z;
 	for (int i = 0; i < yRes + 1; i++)
 	{
@@ -123,6 +124,7 @@ GLuint App::createSphereVBO(int xRes, int yRes) {
 	std::vector<face> faceData;
 	vtxData t = { 1,1,1,1,1,1,1,1 };
 	faceData.resize(2 * xRes*yRes, { t,t,t });
+	//face* faceData = new face[2*newRes*(newRes/2+1)];
 	for (int i = 0; i < yRes - 1; i++) {
 		for (int j = 0; j < xRes; j++) {
 			int a = i*xRes + j;
@@ -162,7 +164,7 @@ GLuint App::createSphereVBO(int xRes, int yRes) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 
-	forwardProgram.sphereTex = loadTexture("textures/daSphere.png");
+	forwardProgram.sphereTex = loadTexture("textures/daSphere128.png");
 	return sphereVa;
 }
 
@@ -277,24 +279,25 @@ GLuint App::createCubeVBO()
 						{ 1, 1 }	   //11
 	};
 	//Faces
-	betterFace faces[12] = {{ { pos[0], norm[4], UVs[10] }, { pos[2], norm[4], UVs[7] }, { pos[1], norm[4], UVs[11] } }, 
-							{ { pos[1], norm[4], UVs[11] }, { pos[2], norm[4], UVs[7] }, { pos[3], norm[4], UVs[8] } },
-											  																   
-							{ { pos[1], norm[1], UVs[5] }, { pos[4], norm[1], UVs[1] }, { pos[0], norm[1], UVs[2] } } , 
-							{ { pos[1], norm[1], UVs[5] }, { pos[5], norm[1], UVs[4] }, { pos[4], norm[1], UVs[1] } } ,
-							 								 				 			 					   
-							{ { pos[4], norm[5], UVs[8] }, { pos[5], norm[5], UVs[7] }, { pos[7], norm[5], UVs[4] } } , 
-							{ { pos[4], norm[5], UVs[8] }, { pos[7], norm[5], UVs[4] }, { pos[6], norm[5], UVs[5] } } ,
-							 								 				 			 					   
-							{ { pos[2], norm[3], UVs[7] }, { pos[6], norm[3], UVs[6] }, { pos[3], norm[3], UVs[4] } } , 
-							{ { pos[3], norm[3], UVs[4] }, { pos[6], norm[3], UVs[6] }, { pos[7], norm[3], UVs[3] } } ,
-							 								 				 			 					   
-							{ { pos[0], norm[2], UVs[10] }, { pos[6], norm[2], UVs[6] }, { pos[2], norm[2], UVs[7] } } , 
-							{ { pos[0], norm[2], UVs[10] }, { pos[4], norm[2], UVs[9] }, { pos[6], norm[2], UVs[6] } } ,
-														 			 				 						   
-							{ { pos[1], norm[0], UVs[1] }, { pos[7], norm[0], UVs[3] }, { pos[5], norm[0], UVs[0] } } , 
-							{ { pos[1], norm[0], UVs[1] }, { pos[3], norm[0], UVs[4] }, { pos[7], norm[0], UVs[3] } }
-	};			
+	betterFace faces[12] = { { { pos[0], norm[4], UVs[10] },{ pos[1], norm[4], UVs[11] },{ pos[2], norm[4], UVs[7] } },
+							{ { pos[1], norm[4], UVs[11] },{ pos[3], norm[4], UVs[8] },{ pos[2], norm[4], UVs[7] } },
+
+							{ { pos[1], norm[1], UVs[5] },{ pos[0], norm[1], UVs[2] },{ pos[4], norm[1], UVs[1] } } ,
+							{ { pos[1], norm[1], UVs[5] },{ pos[4], norm[1], UVs[1] },{ pos[5], norm[1], UVs[4] } } ,
+
+							{ { pos[4], norm[5], UVs[8] },{ pos[7], norm[5], UVs[4] },{ pos[5], norm[5], UVs[7] } } ,
+							{ { pos[4], norm[5], UVs[8] },{ pos[6], norm[5], UVs[5] },{ pos[7], norm[5], UVs[4] } } ,
+
+							{ { pos[2], norm[3], UVs[7] },{ pos[3], norm[3], UVs[4] },{ pos[6], norm[3], UVs[6] } } ,
+							{ { pos[3], norm[3], UVs[4] },{ pos[7], norm[3], UVs[3] },{ pos[6], norm[3], UVs[6] } } ,
+
+							{ { pos[0], norm[2], UVs[10] },{ pos[6], norm[2], UVs[6] },{ pos[2], norm[2], UVs[7] } } ,
+							{ { pos[0], norm[2], UVs[10] },{ pos[4], norm[2], UVs[9] },{ pos[6], norm[2], UVs[6] } } ,
+
+							{ { pos[1], norm[0], UVs[1] },{ pos[5], norm[0], UVs[0] },{ pos[7], norm[0], UVs[3] } } ,
+							{ { pos[1], norm[0], UVs[1] },{ pos[7], norm[0], UVs[3] },{ pos[3], norm[0], UVs[4] } }
+
+	};
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -307,7 +310,7 @@ GLuint App::createCubeVBO()
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(betterData), (void*)offsetof(betterData, normals));
 	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(betterData), (void*)offsetof(betterData, UV));
 
-	forwardProgram.cubeTex = loadTexture("textures/rubik.png");
+	forwardProgram.cubeTex = loadTexture("textures/rubik128.png");
 	return cubeVa;
 }
 
@@ -349,20 +352,21 @@ void App::createSpheres()
 
 GLuint App::loadTexture(std::string path)
 {
-	GLuint tex = SOIL_load_OGL_texture
-	(
-		path.c_str(),
-		SOIL_LOAD_AUTO,
-		SOIL_CREATE_NEW_ID, 
-		SOIL_FLAG_INVERT_Y
-	);
+	GLuint tex;
+	GLint width, height, channel;
+	unsigned char* data = SOIL_load_image(path.c_str(), &width, &height, &channel, 4);
+
+	glGenTextures(1, &tex);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, tex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA32F, width, height);// , 0, GL_RGBA, GL_FLOAT, nullptr);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, data);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);	
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
 	return tex;
 }
 
@@ -396,7 +400,7 @@ void App::saveFrameToFile(int nr)
 	
 	int err = SOIL_save_image
 	(
-		"img.bmp",
+		"C:/Users/Maggan/Desktop/bilder/imgFOR.bmp",
 		SOIL_SAVE_TYPE_BMP,
 		Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, 3,
 		&imgData[0]
@@ -431,7 +435,7 @@ void App::run() {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();	
 		//controls(dt);
-		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos, dt);
+		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos, 0.05f);
 		glfwSwapBuffers(w);
 		int a = glGetError();
 		if (a) {
@@ -441,11 +445,11 @@ void App::run() {
 		runTime -= dt;
 		if (runTime <= 0.0)
 			running = false;
-		screenShotTimer -= dt;
+		screenShotTimer -= 0.05f;
 		if (screenShotTimer < 0)
 		{
 			saveFrameToFile(nrOfScreenShots++);
-			screenShotTimer = 5;
+			screenShotTimer = 600000;
 		}
 	}
 	std::ofstream logFile("log.txt");
