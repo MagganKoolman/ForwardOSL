@@ -117,7 +117,7 @@ void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, flo
 	//GLint locWorld = glGetUniformLocation(this->programID, "world");
 	updateLights(sphereObjs, 256); 
 	updateLights(cubeObjs, 256);
-
+	
 	glBindVertexArray(cubeVao);
 	glBindTexture(GL_TEXTURE_2D, cubeTex);
 	for (int i = 0; i < 256; i++)

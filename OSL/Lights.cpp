@@ -16,6 +16,7 @@ void Lights::update(GLuint programID, float dt)
 	glm::vec3 pos;
 	for (int i = 0; i < nrOfLight; i++) {
 		pos.x = i * 4 + cosf(i*timer);
+		pos.y = allLights[i].position.y;
 		pos.z = i * 4 + sinf(i*timer);
 		allLights[i].position = vec4(pos, allLights[i].position.w);
 		lightboxes[i].position = pos;
@@ -51,5 +52,5 @@ void Lights::init(GLuint programID, int nrOfLights)
 		this->lightboxes[i].init(pos, 5);
 	}
 	this->nrOfLight = nrOfLights;
-	update(programID, 0.05f);
+	update(programID, 0.00f);
 }

@@ -35,16 +35,17 @@ void main()
 	vec3 vHalfVector;
 	float specular = 0;
 	int index = 0;
+	vec3 lightpos;
 	for (int i = 0; i < activeLights; i++)
 	{
 		index = indices[i];
-		if (length(lights[index].position.xyz - posOut) < lights[index].position.w)
-		{
-			diffuseVec = normalize(lights[index].position.xyz - posOut);
+		lightpos = lights[index].position.xyz;
+		if(length(lightpos - posOut) < lights[index].position.w){  
+			vec3 diffuseVec = normalize(lightpos - posOut);
 			diffuse += dot(diffuseVec, normalOut);
 
-			eyeDir = normalize(lights[index].position.xyz  - cameraPos);
-			vHalfVector = reflect(diffuseVec, normalOut);
+			vec3 eyeDir = normalize(lightpos - cameraPos);
+			vec3 vHalfVector = reflect(diffuseVec, normalOut);
 			specular += pow(max(dot(eyeDir, vHalfVector),0.0), 20);
 		}
 	}
