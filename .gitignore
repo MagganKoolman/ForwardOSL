@@ -1,7 +1,6 @@
 *.opendb
 Debug/*
 *.suo
-*.sln
 *.filters
 !OSL/*.cpp
 !OSL/*.h

@@ -320,23 +320,15 @@ void App::createCubes()
 	int index = 0;
 	glm::vec3 pos;
 	float radius = sqrtf(3) / 2;
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 16; j++) {
-			pos = glm::vec3(i * 2 * 2, -2, j * 2 * 2);
-			forwardProgram.cubeObjs[index].hb.init(pos, radius);
-			forwardProgram.cubeObjs[index].fixed = false;
-			cubeMatrices[index++] = glm::translate(glm::mat4(1), pos);
-		}
-	}
-
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 16; j++) {
-			pos = glm::vec3(i * 2 * 2, 2, (j * 2 + 1) * 2);
-			forwardProgram.cubeObjs[index].hb.init(pos, radius);
-			forwardProgram.cubeObjs[index].fixed = false;
-			cubeMatrices[index++] = glm::translate(glm::mat4(1), pos);
+	for (int y = 0; y < 4; y++) {
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++) {
+				pos = glm::vec3(i * 2 * 2, y*2, j * 2 * 2);
+				forwardProgram.cubeObjs[index].hb.init(pos, radius);
+				forwardProgram.cubeObjs[index].fixed = false;
+				cubeMatrices[index++] = glm::translate(glm::mat4(1), pos);
+			}
 		}
 	}
 }
@@ -345,23 +337,15 @@ void App::createSpheres()
 {
 	int index = 0;
 	glm::vec3 pos;
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 16; j++) {
-			pos = glm::vec3(i * 2 * 2, -2, (j * 2 + 1) * 2);
-			forwardProgram.sphereObjs[index].hb.init(pos, 0.5f);
-			forwardProgram.sphereObjs[index].fixed = false;
-			sphereMatrices[index++] = glm::translate(glm::mat4(1), pos);
-		}
-	}
-
-	for (int i = 0; i < 8; i++)
-	{
-		for (int j = 0; j < 16; j++) {
-			pos = glm::vec3(i * 2 * 2, 2, j * 2 * 2);
-			forwardProgram.sphereObjs[index].hb.init(pos, 0.5f);
-			forwardProgram.sphereObjs[index].fixed = false;
-			sphereMatrices[index++] = glm::translate(glm::mat4(1), pos);
+	for (int y = 0; y < 4; y++) {
+		for (int i = 0; i < 8; i++)
+		{
+			for (int j = 0; j < 8; j++) {
+				pos = glm::vec3(i * 2 * 2, y*2, (j * 2 + 1) * 2);
+				forwardProgram.sphereObjs[index].hb.init(pos, 0.5f);
+				forwardProgram.sphereObjs[index].fixed = false;
+				sphereMatrices[index++] = glm::translate(glm::mat4(1), pos);
+			}
 		}
 	}
 }
