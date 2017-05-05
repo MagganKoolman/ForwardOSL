@@ -22,8 +22,8 @@ layout(std140) uniform Lights
   Light lights[nrOfLights];
 };
 
-layout(location = 5) uniform int indices[nrOfLights];
-layout(location = 4) uniform int activeLights;
+//layout(location = 5) uniform int indices[nrOfLights];
+//layout(location = 4) uniform int activeLights;
 
 void main()
 {
@@ -36,9 +36,9 @@ void main()
 	float specular = 0;
 	int index = 0;
 	vec3 lightpos;
-	for (int i = 0; i < activeLights; i++)
+	for (int i = 0; i < nrOfLights; i++)
 	{
-		index = indices[i];
+		index = i;
 		lightpos = lights[index].position.xyz;
 		if(length(lightpos - posOut) < lights[index].position.w){  
 			vec3 diffuseVec = normalize(lightpos - posOut);

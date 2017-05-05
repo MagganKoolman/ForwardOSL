@@ -107,7 +107,7 @@ void Forward::updateLights(renderObject* instances, int number) {
 void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, float dt)
 {
 	glUseProgram(this->programID);
-	//lights.update(programID, dt);
+	lights.update(programID, dt);
 	//GLint loc = glGetUniformLocation(this->programID, "viewProjection");
 	glUniformMatrix4fv(3, 1, GL_FALSE, &viewProj[0][0]);
 	
@@ -122,8 +122,8 @@ void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, flo
 	glBindTexture(GL_TEXTURE_2D, cubeTex);
 	for (int i = 0; i < 256; i++)
 	{
-		glUniform1i(4, cubeObjs[i].lightsAffecting);
-		glUniform1iv(5, 10, cubeObjs[i].lights);
+		//glUniform1i(4, cubeObjs[i].lightsAffecting);
+		//glUniform1iv(5, 10, cubeObjs[i].lights);
 		glUniformMatrix4fv(1, 1, GL_FALSE, &cubes[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
@@ -132,8 +132,8 @@ void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, flo
 	glBindTexture(GL_TEXTURE_2D, sphereTex);
 	for (int i = 0; i < 256; i++)
 	{
-		glUniform1i(4, sphereObjs[i].lightsAffecting);
-		glUniform1iv(5, 10, sphereObjs[i].lights);
+		//glUniform1i(4, sphereObjs[i].lightsAffecting);
+		//glUniform1iv(5, 10, sphereObjs[i].lights);
 		glUniformMatrix4fv(1, 1, GL_FALSE, &spheres[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, sphereSize);
 	}

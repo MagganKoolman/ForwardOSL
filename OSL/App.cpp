@@ -397,10 +397,10 @@ void App::saveFrameToFile(int nr)
 
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, &imgData[0]);
-	
-	int err = SOIL_save_image
-	(
-		"C:/Users/Maggan/Desktop/bilder/imgFOR.bmp",
+
+	std::string path = "../results/imgFOR" + std::to_string(nr) + ".png";
+	int err = SOIL_save_image(
+		path.c_str(),
 		SOIL_SAVE_TYPE_BMP,
 		Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, 3,
 		&imgData[0]
@@ -419,7 +419,7 @@ void App::controls(float dt)
 }
 
 void App::run() {
-	glClearColor(1.0, 0.0, 1.0, 1.0);
+	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glfwGetCursorPos(w, &lastx, &lasty);
 	double time, dt;
 	time = 0.0;
@@ -430,34 +430,26 @@ void App::run() {
 	int totalFrames = 0;
 	glfwSwapInterval(0);
 	while(!glfwWindowShouldClose(w) && running){
-		dt = glfwGetTime() - time;
-		time = glfwGetTime();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();	
-		controls(dt);
-		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos, 0.00f);
+		//controls(0.005f);
+		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos, 0.005f);
 		glfwSwapBuffers(w);
 		int a = glGetError();
 		if (a) {
 			std::cout << glewGetErrorString(a) << std::endl;
 		}
 		totalFrames++;
-		//runTime -= dt;
-		if (runTime <= 0.0)
+		if (totalFrames == 50000)
 			running = false;
-		screenShotTimer -= 0.05f;
-		if (screenShotTimer < 0)
+		if (totalFrames % 10000 == 0)
 		{
-			for (int i = 0; i < forwardProgram.nrOfLights; i++) {
-				glm::vec3 a = forwardProgram.lights.allLights[i].position;
-				std::cout << a.x << ", " << a.y << ", " << a.z << "\n";
-			}
 			saveFrameToFile(nrOfScreenShots++);
-			screenShotTimer = 600000;
 		}
 	}
-	std::ofstream logFile("log.txt");
-	logFile << totalFrames << "\n";
+	time = glfwGetTime();
+	std::ofstream logFile("../results/logFOR.txt");
+	logFile << time << "\n";
 	logFile.close();
 }
 
