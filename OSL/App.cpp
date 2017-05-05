@@ -77,7 +77,7 @@ App::App() {
 	glfwSetKeyCallback(w, key_callback);
 	glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	forwardProgram.init();
+	forwardProgram.init(false);
 
 	sphereSize = 0;
 	forwardProgram.sphereVao = createSphereVBO(20, 20);
