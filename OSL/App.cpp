@@ -398,7 +398,7 @@ void App::saveFrameToFile(int nr)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, &imgData[0]);
 
-	std::string path = "../results/imgFOR" + std::to_string(nr) + ".png";
+	std::string path = "../../results/imgFOR" + std::to_string(nr) + ".bmp";
 	int err = SOIL_save_image(
 		path.c_str(),
 		SOIL_SAVE_TYPE_BMP,
@@ -428,7 +428,13 @@ void App::run() {
 	double screenShotTimer = 2;
 	int nrOfScreenShots = 0;
 	int totalFrames = 0;
+	int everyXFrame = 10000;
 	glfwSwapInterval(0);
+	if (!forwardProgram.dynamic)
+	{
+		everyXFrame = 30000;
+		nrOfScreenShots = 9;
+	}
 	while(!glfwWindowShouldClose(w) && running){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glfwPollEvents();	
@@ -442,13 +448,13 @@ void App::run() {
 		totalFrames++;
 		if (totalFrames == 50000)
 			running = false;
-		if (totalFrames % 10000 == 0)
+		if (totalFrames % everyXFrame == 0)
 		{
 			saveFrameToFile(nrOfScreenShots++);
 		}
 	}
 	time = glfwGetTime();
-	std::ofstream logFile("../results/logFOR.txt");
+	std::ofstream logFile("../../results/logFOR.txt");
 	logFile << time << "\n";
 	logFile.close();
 }

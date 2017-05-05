@@ -46,7 +46,7 @@ Forward::~Forward()
 {
 }
 
-void Forward::init()
+void Forward::init(bool dynamic)
 {
 	//Create shaders
 	const char* textc;
@@ -90,6 +90,7 @@ void Forward::init()
 
 	this->sphereObjs = new renderObject[256];
 	this->cubeObjs = new renderObject[256];
+	this->dynamic = dynamic;
 }
 
 void Forward::updateLights(renderObject* instances, int number) {
@@ -107,23 +108,15 @@ void Forward::updateLights(renderObject* instances, int number) {
 void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, float dt)
 {
 	glUseProgram(this->programID);
-	lights.update(programID, dt);
-	//GLint loc = glGetUniformLocation(this->programID, "viewProjection");
-	glUniformMatrix4fv(3, 1, GL_FALSE, &viewProj[0][0]);
-	
-	//GLint loc2 = glGetUniformLocation(this->programID, "cameraPos");
+	//lights.update(programID, dt);
+	glUniformMatrix4fv(3, 1, GL_FALSE, &viewProj[0][0]);	
 	glUniform3fv(2, 1, &position[0]);
 	
-	//GLint locWorld = glGetUniformLocation(this->programID, "world");
-	updateLights(sphereObjs, 256); 
-	updateLights(cubeObjs, 256);
-	
+
 	glBindVertexArray(cubeVao);
 	glBindTexture(GL_TEXTURE_2D, cubeTex);
 	for (int i = 0; i < 256; i++)
 	{
-		//glUniform1i(4, cubeObjs[i].lightsAffecting);
-		//glUniform1iv(5, 10, cubeObjs[i].lights);
 		glUniformMatrix4fv(1, 1, GL_FALSE, &cubes[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
@@ -132,8 +125,6 @@ void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, flo
 	glBindTexture(GL_TEXTURE_2D, sphereTex);
 	for (int i = 0; i < 256; i++)
 	{
-		//glUniform1i(4, sphereObjs[i].lightsAffecting);
-		//glUniform1iv(5, 10, sphereObjs[i].lights);
 		glUniformMatrix4fv(1, 1, GL_FALSE, &spheres[i][0][0]);
 		glDrawArrays(GL_TRIANGLES, 0, sphereSize);
 	}

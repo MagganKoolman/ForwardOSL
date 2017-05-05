@@ -22,9 +22,6 @@ layout(std140) uniform Lights
   Light lights[nrOfLights];
 };
 
-//layout(location = 5) uniform int indices[nrOfLights];
-//layout(location = 4) uniform int activeLights;
-
 void main()
 {
 	vec4 color = texture(someTex, UVout);
@@ -38,14 +35,13 @@ void main()
 	vec3 lightpos;
 	for (int i = 0; i < nrOfLights; i++)
 	{
-		index = i;
-		lightpos = lights[index].position.xyz;
-		if(length(lightpos - posOut) < lights[index].position.w){  
-			vec3 diffuseVec = normalize(lightpos - posOut);
+		lightpos = lights[i].position.xyz;
+		if(length(lightpos - posOut) < lights[i].position.w){  
+			diffuseVec = normalize(lightpos - posOut);
 			diffuse += dot(diffuseVec, normalOut);
 
-			vec3 eyeDir = normalize(lightpos - cameraPos);
-			vec3 vHalfVector = reflect(diffuseVec, normalOut);
+			eyeDir = normalize(lightpos - cameraPos);
+			vHalfVector = reflect(diffuseVec, normalOut);
 			specular += pow(max(dot(eyeDir, vHalfVector),0.0), 20);
 		}
 	}

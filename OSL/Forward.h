@@ -14,6 +14,7 @@ struct renderObject {
 	bool fixed;
 };
 public:
+	bool dynamic;
 	int nrOfSpheres;
 	int nrOfCubes;
 	Lights lights;
@@ -21,7 +22,7 @@ public:
 	int sphereSize;
 	Forward();
 	~Forward();
-	void init();
+	void init(bool dynamic);
 	void render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, float dt);
 	void updateLights(renderObject* instances, int number);
 	glm::mat4* cubes;
