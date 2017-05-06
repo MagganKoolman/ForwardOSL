@@ -33,9 +33,14 @@ private:
 	glm::mat4 sphereMatrices[256];
 	glm::vec3 movement = { 0,0,0 };
 
+	int runTime;
+	int everyXFrame;
+	std::string resultPath;
+
 	void controls(float dt);
 public:
 	App();
+	App(bool mode, int runTime, int shotRate, std::string path);
 	~App();
 	void run();
 	GLuint createSphereVBO(int resolution);

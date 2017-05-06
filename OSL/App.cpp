@@ -56,6 +56,12 @@ void App::updateInputs() {
 	movement = {  aDown + -1 *dDown, eDown + -1 * qDown, wDown + -1 * sDown };
 }
 App::App() {
+}
+
+App::App(bool mode, int runTime, int shotRate, std::string path) {
+	this->runTime = runTime;
+	this->everyXFrame = shotRate;
+	this->resultPath = path;
 	glfwInit();
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	w = glfwCreateWindow(Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, "OSL", NULL, NULL);
@@ -66,18 +72,12 @@ App::App() {
 		std::cout << ((char*)glewGetErrorString(error));
 	glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 	glDebugMessageCallback(gl_callback, nullptr);
-	glDebugMessageControl(GL_DONT_CARE,
-		GL_DONT_CARE,
-		GL_DONT_CARE,
-		0,
-		nullptr,
-		GL_TRUE
-		);
+	glDebugMessageControl(GL_DONT_CARE,	GL_DONT_CARE, GL_DONT_CARE,	0, nullptr, GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glfwSetKeyCallback(w, key_callback);
 	glfwSetInputMode(w, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	forwardProgram.init(false);
+	forwardProgram.init(mode);
 
 	sphereSize = 0;
 	forwardProgram.sphereVao = createSphereVBO(20, 20);
@@ -398,7 +398,7 @@ void App::saveFrameToFile(int nr)
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(0, 0, Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE, &imgData[0]);
 
-	std::string path = "../../results/imgFOR" + std::to_string(nr) + ".bmp";
+	std::string path = this->resultPath + "/imgFOR" + std::to_string(nr) + ".bmp";
 	int err = SOIL_save_image(
 		path.c_str(),
 		SOIL_SAVE_TYPE_BMP,
@@ -421,18 +421,14 @@ void App::controls(float dt)
 void App::run() {
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glfwGetCursorPos(w, &lastx, &lasty);
-	double time, dt;
-	time = 0.0;
+	double time = 0.0;
 	glfwSetTime(time);
-	double runTime = 5;
-	double screenShotTimer = 2;
+
 	int nrOfScreenShots = 0;
 	int totalFrames = 0;
-	int everyXFrame = 10000;
 	glfwSwapInterval(0);
 	if (!forwardProgram.dynamic)
 	{
-		everyXFrame = 30000;
 		nrOfScreenShots = 9;
 	}
 	while(!glfwWindowShouldClose(w) && running){
@@ -441,12 +437,12 @@ void App::run() {
 		//controls(0.005f);
 		forwardProgram.render(camera.view, camera.getViewProjection(), camera.cameraPos, 0.005f);
 		glfwSwapBuffers(w);
-		int a = glGetError();
+		/*int a = glGetError();
 		if (a) {
 			std::cout << glewGetErrorString(a) << std::endl;
-		}
+		}*/
 		totalFrames++;
-		if (totalFrames == 50000)
+		if (totalFrames == runTime)
 			running = false;
 		if (totalFrames % everyXFrame == 0)
 		{
@@ -454,7 +450,7 @@ void App::run() {
 		}
 	}
 	time = glfwGetTime();
-	std::ofstream logFile("../../results/logFOR.txt");
+	std::ofstream logFile(this->resultPath + "/logFOR.txt");
 	logFile << time << "\n";
 	logFile.close();
 }

@@ -108,11 +108,11 @@ void Forward::updateLights(renderObject* instances, int number) {
 void Forward::render(glm::mat4 view, glm::mat4 viewProj, glm::vec3 position, float dt)
 {
 	glUseProgram(this->programID);
-	//lights.update(programID, dt);
+	if (this->dynamic)
+		lights.update(programID, dt);
 	glUniformMatrix4fv(3, 1, GL_FALSE, &viewProj[0][0]);	
 	glUniform3fv(2, 1, &position[0]);
 	
-
 	glBindVertexArray(cubeVao);
 	glBindTexture(GL_TEXTURE_2D, cubeTex);
 	for (int i = 0; i < 256; i++)
