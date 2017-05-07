@@ -58,10 +58,11 @@ void App::updateInputs() {
 App::App() {
 }
 
-App::App(bool mode, int runTime, int shotRate, std::string path) {
+App::App(bool mode, int runTime, int shotRate, int instanceNumber, std::string path) {
 	this->runTime = runTime;
 	this->everyXFrame = shotRate;
 	this->resultPath = path;
+	this->instanceID = instanceNumber;
 	glfwInit();
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 	w = glfwCreateWindow(Camera::SCREEN_WIDTH, Camera::SCREEN_HEIGHT, "OSL", NULL, NULL);
@@ -450,8 +451,9 @@ void App::run() {
 		}
 	}
 	time = glfwGetTime();
-	std::ofstream logFile(this->resultPath + "/logFOR.txt");
-	logFile << time << "\n";
+	std::ofstream logFile;
+	logFile.open(this->resultPath + "/logFOR.txt", std::ios_base::app);
+	logFile << time << " " << forwardProgram.dynamic << " " << this->instanceID << "\n";
 	logFile.close();
 }
 

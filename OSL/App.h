@@ -35,12 +35,13 @@ private:
 
 	int runTime;
 	int everyXFrame;
+	int instanceID;
 	std::string resultPath;
 
 	void controls(float dt);
 public:
 	App();
-	App(bool mode, int runTime, int shotRate, std::string path);
+	App(bool mode, int runTime, int shotRate, int instanceNumber, std::string path);
 	~App();
 	void run();
 	GLuint createSphereVBO(int resolution);
